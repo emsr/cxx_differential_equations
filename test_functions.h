@@ -19,7 +19,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp);
     void jacobian(_Tp);
@@ -36,7 +36,7 @@ template<typename _Tp>
   void
   linear<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = _Tp{0};
+    dfdy[0][0] = _Tp{0};
 
     dfdx[0] = _Tp{0};
   }
@@ -55,7 +55,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp);
     void jacobian(_Tp);
@@ -72,7 +72,8 @@ template<typename _Tp>
   void
   exptest<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = y[0];
+    dfdy[0][0] = y[0];
+
     dfdx[0] = _Tp{0};
   }
 
@@ -89,7 +90,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp);
     void jacobian(_Tp);
@@ -109,7 +110,7 @@ template<typename _Tp>
   void
   stepfn<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = _Tp{0};
+    dfdy[0][0] = _Tp{0};
 
     dfdx[0] = _Tp{0};
   }
@@ -124,7 +125,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp);
     void jacobian(_Tp);
@@ -146,10 +147,10 @@ template<typename _Tp>
   void
   sintest<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = _Tp{0};
-    dfdy[1] = _Tp{-1};
-    dfdy[2] = _Tp{1};
-    dfdy[3] = _Tp{0};
+    dfdy[0][0] = _Tp{0};
+    dfdy[0][1] = _Tp{-1};
+    dfdy[1][0] = _Tp{1};
+    dfdy[1][1] = _Tp{0};
 
     dfdx[0] = _Tp{0};
     dfdx[1] = _Tp{0};
@@ -165,7 +166,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp);
     void jacobian(_Tp);
@@ -227,10 +228,10 @@ template<typename _Tp>
 
     if (n > 50 && n < 55)
       {
-	dfdy[0] = NaN;
-	dfdy[1] = NaN;
-	dfdy[2] = NaN;
-	dfdy[3] = NaN;
+	dfdy[0][0] = NaN;
+	dfdy[0][1] = NaN;
+	dfdy[1][0] = NaN;
+	dfdy[1][1] = NaN;
 
 	dfdx[0] = NaN;
 	dfdx[1] = NaN;
@@ -238,10 +239,10 @@ template<typename _Tp>
 	return;
       }
 
-    dfdy[0] = _Tp{0};
-    dfdy[1] = -1.0;
-    dfdy[2] = 1.0;
-    dfdy[3] = _Tp{0};
+    dfdy[0][0] = _Tp{0};
+    dfdy[0][1] = _Tp{-1};
+    dfdy[1][0] = _Tp{1};
+    dfdy[1][1] = _Tp{0};
 
     dfdx[0] = _Tp{0};
     dfdx[1] = _Tp{0};
@@ -266,7 +267,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -284,10 +285,10 @@ template<typename _Tp>
   void
   stiff<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = 998.0;
-    dfdy[1] = 1998.0;
-    dfdy[2] = -999.0;
-    dfdy[3] = -1999.0;
+    dfdy[0][0] = _Tp{998};
+    dfdy[0][1] = _Tp{1998};
+    dfdy[1][0] = _Tp{-999};
+    dfdy[1][1] = _Tp{-1999};
 
     dfdx[0] = _Tp{0};
     dfdx[1] = _Tp{0};
@@ -308,7 +309,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -331,10 +332,10 @@ template<typename _Tp>
   vanderpol<_Tp>::jacobian(_Tp)
   {
 
-    dfdy[0] = _Tp{0};
-    dfdy[1] = _Tp{1};
-    dfdy[2] = _Tp{-2} * mu * y[0] * y[1] - _Tp{1};
-    dfdy[3] = mu * (_Tp{1} - y[0] * y[0]);
+    dfdy[0][0] = _Tp{0};
+    dfdy[0][1] = _Tp{1};
+    dfdy[1][0] = _Tp{-2} * mu * y[0] * y[1] - _Tp{1};
+    dfdy[1][1] = mu * (_Tp{1} - y[0] * y[0]);
 
     dfdx[0] = _Tp{0};
     dfdx[1] = _Tp{0};
@@ -354,7 +355,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -379,17 +380,17 @@ template<typename _Tp>
   void
   oregonator<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = c1 * (1 - 2 * c2 * y[0] - y[1]);
-    dfdy[1] = c1 * (1 - y[0]);
-    dfdy[2] = _Tp{0};
+    dfdy[0][0] = c1 * (1 - 2 * c2 * y[0] - y[1]);
+    dfdy[0][1] = c1 * (1 - y[0]);
+    dfdy[0][2] = _Tp{0};
 
-    dfdy[3] = 1 / c1 * (-y[1]);
-    dfdy[4] = 1 / c1 * (-1 - y[0]);
-    dfdy[5] = 1 / c1;
+    dfdy[1][0] = 1 / c1 * (-y[1]);
+    dfdy[1][1] = 1 / c1 * (-1 - y[0]);
+    dfdy[1][2] = 1 / c1;
 
-    dfdy[6] = c3;
-    dfdy[7] = _Tp{0};
-    dfdy[8] = -c3;
+    dfdy[2][0] = c3;
+    dfdy[2][1] = _Tp{0};
+    dfdy[2][2] = -c3;
 
     dfdx[0] = _Tp{0};
     dfdx[1] = _Tp{0};
@@ -411,7 +412,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -436,10 +437,10 @@ template<typename _Tp>
   void
   volterra_lotka<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = a - b * y[1];
-    dfdy[1] = -b * y[0];
-    dfdy[2] = d * y[1];
-    dfdy[3] = -c + d * y[0];
+    dfdy[0][0] = a - b * y[1];
+    dfdy[0][1] = -b * y[0];
+    dfdy[1][0] = d * y[1];
+    dfdy[1][1] = -c + d * y[0];
 
     dfdx[0] = _Tp{0};
     dfdx[1] = _Tp{0};
@@ -459,7 +460,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -476,7 +477,7 @@ template<typename _Tp>
   void
   stifftrig<_Tp>::jacobian(_Tp x)
   {
-    dfdy[0] = _Tp{-50};
+    dfdy[0][0] = _Tp{-50};
 
     dfdx[0] = _Tp{-50} * std::sin(x);
   }
@@ -501,7 +502,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -528,25 +529,25 @@ template<typename _Tp>
   void
   e5<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = -a - b * y[2];
-    dfdy[1] = _Tp{0};
-    dfdy[2] = -b * y[0];
-    dfdy[3] = _Tp{0};
+    dfdy[0][0] = -a - b * y[2];
+    dfdy[0][1] = _Tp{0};
+    dfdy[0][2] = -b * y[0];
+    dfdy[0][3] = _Tp{0};
 
-    dfdy[4] = a;
-    dfdy[5] = -m * c * y[2];
-    dfdy[6] = -m * c * y[1];
-    dfdy[7] = _Tp{0};
+    dfdy[1][0] = a;
+    dfdy[1][1] = -m * c * y[2];
+    dfdy[1][2] = -m * c * y[1];
+    dfdy[1][3] = _Tp{0};
 
-    dfdy[8] = a - b * y[2];
-    dfdy[9] = -m * c * y[2];
-    dfdy[10] = -b * y[0] - m * c * y[1];
-    dfdy[11] = c;
+    dfdy[2][0] = a - b * y[2];
+    dfdy[2][1] = -m * c * y[2];
+    dfdy[2][2] = -b * y[0] - m * c * y[1];
+    dfdy[2][3] = c;
 
-    dfdy[12] = b * y[2];
-    dfdy[13] = _Tp{0};
-    dfdy[14] = b * y[0];
-    dfdy[15] = -c;
+    dfdy[3][0] = b * y[2];
+    dfdy[3][1] = _Tp{0};
+    dfdy[3][2] = b * y[0];
+    dfdy[3][3] = -c;
 
     dfdx[0] = _Tp{0};
     dfdx[1] = _Tp{0};
@@ -573,7 +574,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -598,17 +599,17 @@ template<typename _Tp>
   void
   robertson<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = -a;
-    dfdy[1] = b * y[2];
-    dfdy[2] = b * y[1];
+    dfdy[0][0] = -a;
+    dfdy[0][1] = b * y[2];
+    dfdy[0][2] = b * y[1];
 
-    dfdy[3] = a;
-    dfdy[4] = -b * y[2] - 2 * c * y[1];
-    dfdy[5] = -b * y[1];
+    dfdy[1][0] = a;
+    dfdy[1][1] = -b * y[2] - 2 * c * y[1];
+    dfdy[1][2] = -b * y[1];
 
-    dfdy[6] = _Tp{0};
-    dfdy[7] = 2 * c * y[1];
-    dfdy[8] = _Tp{0};
+    dfdy[2][0] = _Tp{0};
+    dfdy[2][1] = 2 * c * y[1];
+    dfdy[2][2] = _Tp{0};
 
     dfdx[0] = _Tp{0};
     dfdx[1] = _Tp{0};
@@ -631,7 +632,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -654,11 +655,11 @@ template<typename _Tp>
   void
   brusselator<_Tp>::jacobian(_Tp)
   {
-    dfdy[0] = 2 * y[0] * y[1] - (b + 1.0);
-    dfdy[1] = y[0] * y[0];
+    dfdy[0][0] = 2 * y[0] * y[1] - (b + 1.0);
+    dfdy[0][1] = y[0] * y[0];
 
-    dfdy[2] = b - 2 * y[0] * y[1];
-    dfdy[3] = -y[0] * y[0];
+    dfdy[1][0] = b - 2 * y[0] * y[1];
+    dfdy[1][1] = -y[0] * y[0];
 
     dfdx[0] = 0;
     dfdx[1] = 0;
@@ -681,7 +682,7 @@ template<typename _Tp>
     std::array<_Tp, dimension> y;
     std::array<_Tp, dimension> f;
     std::array<_Tp, dimension> dfdx;
-    std::array<_Tp, dimension * dimension> dfdy;
+    std::array<std::array<_Tp, dimension>, dimension> dfdy;
 
     void rhs(_Tp x);
     void jacobian(_Tp x);
@@ -755,62 +756,63 @@ template<typename _Tp>
     const auto qpud3 = gamma * delta * std::exp(delta * ud3);
     const auto qpud4 = gamma * delta * std::exp(delta * ud4);
 
-    for (size_t i = 0; i < dimension * dimension; ++i)
-      dfdy[i] = _Tp{0};
+    for (size_t i = 0; i < dimension; ++i)
+      for (size_t j = 0; j < dimension; ++j)
+	dfdy[i][j] = _Tp{0};
 
-    dfdy[0 * dimension + 0] = -1 / (c * r);
-    dfdy[0 * dimension + 7] = 1 / c;
-    dfdy[0 * dimension + 9] = -0.5 / c;
-    dfdy[0 * dimension + 10] = -dfdy[0 * dimension + 9];
-    dfdy[0 * dimension + 13] = dfdy[0 * dimension + 7];
-    dfdy[1 * dimension + 1] = dfdy[0 * dimension + 0];
-    dfdy[1 * dimension + 8] = dfdy[0 * dimension + 7];
-    dfdy[1 * dimension + 11] = dfdy[0 * dimension + 9];
-    dfdy[1 * dimension + 12] = dfdy[0 * dimension + 10];
-    dfdy[1 * dimension + 14] = dfdy[0 * dimension + 13];
-    dfdy[2 * dimension + 2] = (-qpud1 - qpud4) / cs;
-    dfdy[2 * dimension + 4] = qpud1 / cs;
-    dfdy[2 * dimension + 5] = -qpud4 / cs;
-    dfdy[2 * dimension + 6] = (qpud1 + qpud4) / cs;
-    dfdy[2 * dimension + 9] = 1 / cs;
-    dfdy[3 * dimension + 3] = (-qpud2 - qpud3) / cs;
-    dfdy[3 * dimension + 4] = -qpud3 / cs;
-    dfdy[3 * dimension + 5] = qpud2 / cs;
-    dfdy[3 * dimension + 6] = (-qpud2 - qpud3) / cs;
-    dfdy[3 * dimension + 10] = -1 / cs;
-    dfdy[4 * dimension + 2] = qpud1 / cs;
-    dfdy[4 * dimension + 3] = -qpud3 / cs;
-    dfdy[4 * dimension + 4] = (-qpud1 - qpud3) / cs;
-    dfdy[4 * dimension + 6] = (-qpud1 - qpud3) / cs;
-    dfdy[4 * dimension + 11] = 1 / cs;
-    dfdy[5 * dimension + 2] = -qpud4 / cs;
-    dfdy[5 * dimension + 3] = qpud2 / cs;
-    dfdy[5 * dimension + 5] = (-qpud2 - qpud4) / cs;
-    dfdy[5 * dimension + 6] = (qpud2 + qpud4) / cs;
-    dfdy[5 * dimension + 12] = -1 / cs;
-    dfdy[6 * dimension + 2] = (qpud1 + qpud4) / cp;
-    dfdy[6 * dimension + 3] = (-qpud2 - qpud3) / cp;
-    dfdy[6 * dimension + 4] = (-qpud1 - qpud3) / cp;
-    dfdy[6 * dimension + 5] = (qpud2 + qpud4) / cp;
-    dfdy[6 * dimension + 6] = (-qpud1 - qpud2 - qpud3 - qpud4 - 1 / rp) / cp;
-    dfdy[7 * dimension + 0] = -1 / lh;
-    dfdy[8 * dimension + 1] = dfdy[7 * dimension + 0];
-    dfdy[9 * dimension + 0] = 0.5 / ls2;
-    dfdy[9 * dimension + 2] = -1 / ls2;
-    dfdy[9 * dimension + 9] = -rg2 / ls2;
-    dfdy[10 * dimension + 0] = -0.5 / ls3;
-    dfdy[10 * dimension + 3] = 1 / ls3;
-    dfdy[10 * dimension + 10] = -rg3 / ls3;
-    dfdy[11 * dimension + 1] = dfdy[9 * dimension + 0];
-    dfdy[11 * dimension + 4] = dfdy[9 * dimension + 2];
-    dfdy[11 * dimension + 11] = dfdy[9 * dimension + 9];
-    dfdy[12 * dimension + 1] = dfdy[10 * dimension + 0];
-    dfdy[12 * dimension + 5] = dfdy[10 * dimension + 3];
-    dfdy[12 * dimension + 12] = dfdy[10 * dimension + 10];
-    dfdy[13 * dimension + 0] = -1 / ls1;
-    dfdy[13 * dimension + 13] = -(ri + rg1) / ls1;
-    dfdy[14 * dimension + 1] = dfdy[13 * dimension + 0];
-    dfdy[14 * dimension + 14] = -(rc + rg1) / ls1;
+    dfdy[0][0] = -1 / (c * r);
+    dfdy[0][7] = 1 / c;
+    dfdy[0][9] = -0.5 / c;
+    dfdy[0][10] = -dfdy[0][9];
+    dfdy[0][13] = dfdy[0][7];
+    dfdy[1][1] = dfdy[0][0];
+    dfdy[1][8] = dfdy[0][7];
+    dfdy[1][11] = dfdy[0][9];
+    dfdy[1][12] = dfdy[0][10];
+    dfdy[1][14] = dfdy[0][13];
+    dfdy[2][2] = (-qpud1 - qpud4) / cs;
+    dfdy[2][4] = qpud1 / cs;
+    dfdy[2][5] = -qpud4 / cs;
+    dfdy[2][6] = (qpud1 + qpud4) / cs;
+    dfdy[2][9] = 1 / cs;
+    dfdy[3][3] = (-qpud2 - qpud3) / cs;
+    dfdy[3][4] = -qpud3 / cs;
+    dfdy[3][5] = qpud2 / cs;
+    dfdy[3][6] = (-qpud2 - qpud3) / cs;
+    dfdy[3][10] = -1 / cs;
+    dfdy[4][2] = qpud1 / cs;
+    dfdy[4][3] = -qpud3 / cs;
+    dfdy[4][4] = (-qpud1 - qpud3) / cs;
+    dfdy[4][6] = (-qpud1 - qpud3) / cs;
+    dfdy[4][11] = 1 / cs;
+    dfdy[5][2] = -qpud4 / cs;
+    dfdy[5][3] = qpud2 / cs;
+    dfdy[5][5] = (-qpud2 - qpud4) / cs;
+    dfdy[5][6] = (qpud2 + qpud4) / cs;
+    dfdy[5][12] = -1 / cs;
+    dfdy[6][2] = (qpud1 + qpud4) / cp;
+    dfdy[6][3] = (-qpud2 - qpud3) / cp;
+    dfdy[6][4] = (-qpud1 - qpud3) / cp;
+    dfdy[6][5] = (qpud2 + qpud4) / cp;
+    dfdy[6][6] = (-qpud1 - qpud2 - qpud3 - qpud4 - 1 / rp) / cp;
+    dfdy[7][0] = -1 / lh;
+    dfdy[8][1] = dfdy[7][0];
+    dfdy[9][0] = 0.5 / ls2;
+    dfdy[9][2] = -1 / ls2;
+    dfdy[9][9] = -rg2 / ls2;
+    dfdy[10][0] = -0.5 / ls3;
+    dfdy[10][3] = 1 / ls3;
+    dfdy[10][10] = -rg3 / ls3;
+    dfdy[11][1] = dfdy[9][0];
+    dfdy[11][4] = dfdy[9][2];
+    dfdy[11][11] = dfdy[9][9];
+    dfdy[12][1] = dfdy[10][0];
+    dfdy[12][5] = dfdy[10][3];
+    dfdy[12][12] = dfdy[10][10];
+    dfdy[13][0] = -1 / ls1;
+    dfdy[13][13] = -(ri + rg1) / ls1;
+    dfdy[14][1] = dfdy[13][0];
+    dfdy[14][14] = -(rc + rg1) / ls1;
 
     for (size_t i = 0; i < dimension; ++i)
       dfdx[i] = _Tp{0};
