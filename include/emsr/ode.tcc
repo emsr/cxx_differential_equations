@@ -1,21 +1,25 @@
 #ifndef ODE_TCC
 #define ODE_TCC 1
 
-
 #include <cmath>
 #include <stdexcept>
+
+namespace emsr
+{
 
 
 /**
  * Given values for n dependent variables y and their derivatives dydx
  * known at x, use fourth-order Runge-Kutta method to advance the solution
- * over an interval h and return the incremented variables as y_out,
- * (which need not be distinct from y).
+ * over an interval h and return the incremented variables.
+ *
+ * @param deriv Function taking the dependent variable state vector and the independent variable
+ *              and returning the state vector containing the derivative.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
-  _StateVec
-  runge_kutta_4(_Deriv deriv, const _StateVec& y, const _StateVec& dydx,
-        	_Real x, _Real h)
+template<typename Deriv, typename StateVec, typename Real>
+  StateVec
+  runge_kutta_4(Deriv deriv, const StateVec& y, const StateVec& dydx,
+        	Real x, Real h)
   {
     auto h2 = h / 2;
     auto h6 = h / 6;
@@ -32,7 +36,7 @@ template<typename _Deriv, typename _StateVec, typename _Real>
 
     dyt = deriv(yt, x + h);
 
-    return y + h6 * (dydx + dyt + _Real{2} * dym);
+    return y + h6 * (dydx + dyt + Real{2} * dym);
   }
 
 
@@ -44,14 +48,14 @@ template<typename _Deriv, typename _StateVec, typename _Real>
  * which must either be perallocated for n_step + 1 values or be accessed
  * through a back inserter.
  */
-template<typename _Deriv, typename _StateVec, typename _Real,
-	 typename _RealOutIter, typename _StateVecOutIter>
+template<typename Deriv, typename StateVec, typename Real,
+	 typename RealOutIter, typename StateVecOutIter>
   void
-  step_runge_kutta(_Deriv deriv, const _StateVec& y1, _Real x1, _Real x2,
-                    int n_step, _RealOutIter x_tab, _StateVecOutIter y_tab)
+  step_runge_kutta(Deriv deriv, const StateVec& y1, Real x1, Real x2,
+                    int n_step, RealOutIter x_tab, StateVecOutIter y_tab)
   {
     //  Load starting values of dependant variables.
-    _StateVec y = y1;
+    StateVec y = y1;
     y_tab[0] = y;
     x_tab[0] = x1;
     auto x = x1;
@@ -72,11 +76,11 @@ template<typename _Deriv, typename _StateVec, typename _Real,
   }
 
 
-template<typename _StateVec, typename _Real>
-  _Real
-  max_error(const _StateVec& y_temp, const _StateVec& y_scale)
+template<typename StateVec, typename Real>
+  Real
+  max_error(const StateVec& y_temp, const StateVec& y_scale)
   {
-    static constexpr _Real TINY = 1.0e-30;
+    static constexpr Real TINY = 1.0e-30;
     auto errmax = TINY;
     for (int i = 0; i < y_temp.size(); ++i)
       {
@@ -96,23 +100,23 @@ template<typename _StateVec, typename _Real>
  * On output, x and y are replaced by thier new values, h_final is the stepsize which was actually
  * accomplished, and h_next is the estimated next stepsize.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  quad_runge_kutta(_Deriv deriv, _StateVec& y, _StateVec& dydx, _Real& x,
-                   _Real h_try, _Real eps, _StateVec& y_scale, _Real& h_final,
-		   _Real& h_next)
+  quad_runge_kutta(Deriv deriv, StateVec& y, StateVec& dydx, Real& x,
+                   Real h_try, Real eps, StateVec& y_scale, Real& h_final,
+		   Real& h_next)
   {
-    constexpr _Real POW_GROW = 10000;
-    constexpr _Real POW_SHRINK = 1.0e-30;
-    constexpr _Real F_CORR = 1.0 / 15.0;
-    constexpr _Real F_SAFETY = 0.9;
-    constexpr _Real ERR_COND = std::pow((4.0 / F_SAFETY), (1.0 / POW_GROW));
+    constexpr Real POW_GROW = 10000;
+    constexpr Real POW_SHRINK = 1.0e-30;
+    constexpr Real F_CORR = 1.0 / 15.0;
+    constexpr Real F_SAFETY = 0.9;
+    constexpr Real ERR_COND = std::pow((4.0 / F_SAFETY), (1.0 / POW_GROW));
 
     auto dydx_save = dydx;
     auto y_save = y;
     auto x_save = x;
 
-    _StateVec y_temp;
+    StateVec y_temp;
     //  Set stepsize to the initial trial value.
     auto h = h_try;
     while (true)
@@ -156,12 +160,12 @@ template<typename _Deriv, typename _StateVec, typename _Real>
 /**
  * Cash-Carp Runge-Kutta algorithm.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  cash_karp_rk(_Deriv deriv, _StateVec& y, _StateVec& dydx,
-               _Real x, _Real h, _StateVec& y_out, _StateVec& y_err)
+  cash_karp_rk(Deriv deriv, StateVec& y, StateVec& dydx,
+               Real x, Real h, StateVec& y_out, StateVec& y_err)
   {
-    static constexpr _Real
+    static constexpr Real
       a2 = 0.2, a3 = 0.3, a4 = 0.6, a5 = 1.0, a6 = 0.875,
       b21 = 0.2,
       b31 = 3.0/40.0, b32 = 9.0/40.0,
@@ -170,7 +174,7 @@ template<typename _Deriv, typename _StateVec, typename _Real>
       b61 = 1631.0/55296.0, b62 = 175.0/512.0, b63 = 575.0/13824.0, b64 = 44275.0/110592.0, b65 = 253.0/4096.0,
       c1 = 37.0/378.0, c3 = 250.0/621.0, c4 = 125.0/594.0, c6 = 512.0/1771.0,
       dc5 = -277.0/14336.0;
-    static constexpr _Real dc1 = c1 - 2825.0/27648.0, dc3 = c3 - 18575.0/48384.0,
+    static constexpr Real dc1 = c1 - 2825.0/27648.0, dc3 = c3 - 18575.0/48384.0,
                             dc4 = c4 - 13525.0/55296.0, dc6 = c6 - 0.25;
 
     auto y_temp = y + h * b21 * dydx;
@@ -202,19 +206,19 @@ template<typename _Deriv, typename _StateVec, typename _Real>
  * On output, x and y are replaced by thier new values, h_final is the stepsize which was actually
  * accomplished, and h_next is the estimated next stepsize.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  quad_cash_karp_rk(_Deriv deriv, _StateVec& y, _StateVec& dydx, _Real& x,
-                    _Real h_try, _Real eps, _StateVec& y_scale, _Real& h_final,
-		    _Real& h_next)
+  quad_cash_karp_rk(Deriv deriv, StateVec& y, StateVec& dydx, Real& x,
+                    Real h_try, Real eps, StateVec& y_scale, Real& h_final,
+		    Real& h_next)
   {
-    constexpr _Real POW_GROW = -0.20;
-    constexpr _Real POW_SHRINK = -0.25;
-    constexpr _Real F_SAFETY = 0.9;
-    constexpr _Real ERR_COND = std::pow(5 / F_SAFETY, 1 / POW_GROW);
+    constexpr Real POW_GROW = -0.20;
+    constexpr Real POW_SHRINK = -0.25;
+    constexpr Real F_SAFETY = 0.9;
+    constexpr Real ERR_COND = std::pow(5 / F_SAFETY, 1 / POW_GROW);
 
-    _StateVec y_temp, y_err;
-    _Real errmax = 0;
+    StateVec y_temp, y_err;
+    Real errmax = 0;
 
     auto h = h_try;
     while (true)
@@ -228,7 +232,7 @@ template<typename _Deriv, typename _StateVec, typename _Real>
 	h = (h > 0 ? std::max(h_temp, 0.1 * h) : std::min(h_temp, 0.1 * h));
 	auto x_new= x + h;
 	if (x_new == x)
-          throw std::runtime_error("Stepsize underflow in quad_cash_karp_rk.");
+          throw std::runtime_error("quad_cash_karp_rk: Stepsize underflow.");
       }
 
     if (errmax > ERR_COND)
@@ -251,21 +255,21 @@ template<typename _Deriv, typename _StateVec, typename _Real>
  * y1 is replaced by stepped values at the end of the integration interval.
  * stepper is the name of the integration stepper to be used (e.g. quad_runge_kutta or bulirsch_stoer).
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  ode_integrator<_Deriv, _StateVec, _Real>::
-  integrate(_Deriv deriv, _StateVec y1, _Real x1, _Real x2,
-	    _Real eps, _Real h1, _Real hmin,
+  ode_integrator<Deriv, StateVec, Real>::
+  integrate(Deriv deriv, StateVec y1, Real x1, Real x2,
+	    Real eps, Real h1, Real hmin,
 	    int& n_ok, int& n_bad)
   {
-    _Real xsave, h_next, h_final;
+    Real xsave, h_next, h_final;
 
     constexpr int MAXSTEP = 10000;
-    constexpr _Real TINY = 1.0e-30;
+    constexpr Real TINY = 1.0e-30;
 
-    _StateVec y_scale;
-    _StateVec y;
-    _StateVec dydx;
+    StateVec y_scale;
+    StateVec y;
+    StateVec dydx;
 
     auto x = x1;
     auto h = (x2 > x1) ? std::abs(h1) : -std::abs(h1);
@@ -303,10 +307,10 @@ template<typename _Deriv, typename _StateVec, typename _Real>
             return;
           }
 	if (std::abs(h_next) <= hmin)
-          throw std::runtime_error("Step size to small in ode_integrate.");
+          throw std::runtime_error("ode_integrate: Step size to small.");
 	h = h_next;
     }
-    throw std::runtime_error("Too many steps in routine ode_integrate.");
+    throw std::runtime_error("ode_integrate: Too many steps in routine.");
   }
 
 
@@ -318,10 +322,10 @@ template<typename _Deriv, typename _StateVec, typename _Real>
  * however, then y and dydx will be returned undamaged.  Derivs is the user-supplied
  * routine for calculating the right-hand side derivative.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  modified_midpoint(_Deriv deriv, _StateVec& y, _StateVec& dydx, _Real xs,
-                    _Real h_tot, int n_step, _StateVec& y_out)
+  modified_midpoint(Deriv deriv, StateVec& y, StateVec& dydx, Real xs,
+                    Real h_tot, int n_step, StateVec& y_out)
   {
     auto h = h_tot / n_step;
     auto ym = y;
@@ -352,10 +356,10 @@ template<typename _Deriv, typename _StateVec, typename _Real>
  * Nope: This routine can replace modified_midpoint above.
  * Originally, they folded y and y' into one vector to fake he same API as above.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  stoermer(_Deriv deriv, _StateVec& y, _StateVec& dy, _StateVec& d2y, _Real xs,
-           _Real h_tot, int n_step, _StateVec& y_out, _StateVec& dy_out)
+  stoermer(Deriv deriv, StateVec& y, StateVec& dy, StateVec& d2y, Real xs,
+           Real h_tot, int n_step, StateVec& y_out, StateVec& dy_out)
   {
     auto h = h_tot / n_step;
     auto hh = h / 2;
@@ -383,21 +387,21 @@ template<typename _Deriv, typename _StateVec, typename _Real>
  * and adjust stepsize.  Input are the dependent variables y and the derivatives dydx
  * at the starting value of the independent variable x.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  BulirschStoer<_Deriv, _StateVec, _Real>::
-  step(_Deriv deriv, const _StateVec& y, const _StateVec& dydx, _Real& xx,
-       _Real h_try, _Real eps, _StateVec& y_scale,
-       _Real& h_final, _Real& h_next)
+  BulirschStoer<Deriv, StateVec, Real>::
+  step(Deriv deriv, const StateVec& y, const StateVec& dydx, Real& xx,
+       Real h_try, Real eps, StateVec& y_scale,
+       Real& h_final, Real& h_next)
   {
     int km;
     bool exitflag = false;
-    _Real errmax, fact, red, scale, work, workmin, x_est;
+    Real errmax, fact, red, scale, work, workmin, x_est;
 
-    std::vector<_Real> err(KMAXX);
-    _StateVec y_err;
-    _StateVec y_save;
-    _StateVec y_seq;
+    std::vector<Real> err(KMAXX);
+    StateVec y_err;
+    StateVec y_save;
+    StateVec y_seq;
 
     if (eps != m_epsold)
       {
@@ -505,13 +509,13 @@ template<typename _Deriv, typename _StateVec, typename _Real>
  * Routine used by bulirsch_stoer to perform rational function extrapolation.
  * FIXME: These extrapolators don't depend on Deriv and could be a param.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  BulirschStoer<_Deriv, _StateVec, _Real>::
-  m_rational_extrap(int i_est, _Real x_est, _StateVec& y_est, 
-		    _StateVec& yz, _StateVec& dy)
+  BulirschStoer<Deriv, StateVec, Real>::
+  m_rational_extrap(int i_est, Real x_est, StateVec& y_est, 
+		    StateVec& yz, StateVec& dy)
   {
-    std::vector<_Real> fx(i_est);
+    std::vector<Real> fx(i_est);
 
     this->m_xx[i_est] = x_est;
     if (i_est == 0)
@@ -527,7 +531,7 @@ template<typename _Deriv, typename _StateVec, typename _Real>
             this->m_yy[0][j] = y_est[j];
             auto yy = y_est[j];
             auto c = yy;
-            _Real ddy;
+            Real ddy;
             for (int k = 1; k < i_est; ++k)
               {
         	auto b1 = fx[k] * v;
@@ -557,11 +561,11 @@ template<typename _Deriv, typename _StateVec, typename _Real>
  * Routine used by bulirsch_stoer to perform polynomial function extrapolation.
  * FIXME: These extrapolators don't depend on Deriv and could be a param.
  */
-template<typename _Deriv, typename _StateVec, typename _Real>
+template<typename Deriv, typename StateVec, typename Real>
   void
-  BulirschStoer<_Deriv, _StateVec, _Real>::
-  m_polynomial_extrap(int i_est, _Real x_est, _StateVec& y_est, 
-		      _StateVec& yz, _StateVec& dy)
+  BulirschStoer<Deriv, StateVec, Real>::
+  m_polynomial_extrap(int i_est, Real x_est, StateVec& y_est, 
+		      StateVec& yz, StateVec& dy)
   {
     this->m_xx[i_est] = x_est;
     dy = yz = y_est;
@@ -572,7 +576,7 @@ template<typename _Deriv, typename _StateVec, typename _Real>
 	auto c = y_est;
 	for (int k = 0; k < i_est; ++k)
           {
-            auto delta = _Real{1} / (this->m_xx[i_est - k] - x_est);
+            auto delta = Real{1} / (this->m_xx[i_est - k] - x_est);
             auto f1 = delta * x_est;
             auto f2 = delta * this->m_xx[i_est - k];
 	    delta = c - std::exchange(this->m_yy[k], dy);
@@ -584,5 +588,6 @@ template<typename _Deriv, typename _StateVec, typename _Real>
       }
   }
 
+} // namespace emsr
 
 #endif  //  ODE_TCC
